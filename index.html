@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foxstrap</title>
+    <style>
+        :root {
+            --bg-color: #121417; /* Deep, sleek dark grey */
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-blue: #7dd3fc; /* Light blue */
+            --accent-blue-hover: #38bdf8;
+            --accent-grey: #4b5563; /* Medium grey for accents */
+            --grid-line: rgba(255, 255, 255, 0.04); /* Subtle grid lines */
+            --box-hover: rgba(125, 211, 252, 0.2); /* Soft light blue hover */
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* --- REALISTIC VERTICAL RAIN EFFECT --- */
+        #rain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2; 
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .drop {
+            position: absolute;
+            background: linear-gradient(to bottom, rgba(200,200,200,0), rgba(156, 163, 175, 0.4)); /* Greyish rain */
+            width: 1px;
+            height: 50px;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(110vh); opacity: 0; } /* Falls straight down */
+        }
+
+        /* --- INTERACTIVE GRID BACKGROUND --- */
+        #grid-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-wrap: wrap;
+            z-index: -1; 
+        }
+
+        .grid-cell {
+            border-right: 1px solid var(--grid-line);
+            border-bottom: 1px solid var(--grid-line);
+            transition: background-color 0.8s ease; /* Smooth fade OUT */
+        }
+
+        .grid-cell:hover {
+            background-color: var(--box-hover);
+            transition: background-color 0.15s ease-in; /* Smooth fade IN */
+        }
+
+        /* --- LAYOUT & CONTENT --- */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- NAVBAR --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .version-pill {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border: 1px solid var(--accent-grey);
+            border-radius: 12px;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background-color: var(--text-main);
+            color: #000 !important; 
+            padding: 0.5rem 1.4rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--text-muted);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            display: flex;
+            margin-top: 5rem;
+            gap: 2rem;
+        }
+
+        .hero-left {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .hero-right {
+            flex: 1;
+            position: relative;
+        }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        .main-title-area {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .main-logo-img {
+            width: 240px; 
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1)); 
+        }
+
+        .hero-title h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+        }
+
+        .hero-title p {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .description {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .links-list {
+            list-style: none;
+            margin-bottom: 3rem;
+        }
+
+        .links-list li {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .links-list a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: color 0.2s;
+        }
+
+        .links-list a:hover {
+            color: var(--accent-blue-hover);
+        }
+
+        .download-btn-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--accent-grey);
+            padding: 0.8rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 3rem;
+            font-weight: 600;
+        }
+
+        .download-btn-large:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-muted);
+        }
+
+        /* --- WINGET TERMINAL BOX --- */
+        .winget-section p {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .terminal-box {
+            background-color: #0b0c0e; /* Darker than background */
+            border: 1px solid var(--border-color); 
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            margin-bottom: 2rem;
+            width: fit-content;
+            gap: 1.5rem;
+        }
+
+        .terminal-text {
+            color: var(--text-main);
+            font-size: 1.05rem;
+        }
+
+        .terminal-text span {
+            color: var(--accent-blue); 
+        }
+
+        .copy-btn {
+            background: var(--accent-grey);
+            color: var(--text-main);
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #6b7280;
+        }
+
+        .stats-links {
+            color: var(--accent-blue);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .stats-links:hover {
+            color: var(--accent-blue-hover);
+        }
+
+        .github-link-bottom {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .github-link-bottom span {
+            color: var(--accent-blue);
+            transition: color 0.2s;
+        }
+        
+        .github-link-bottom:hover span {
+            color: var(--accent-blue-hover);
+        }
+
+        /* --- RIGHT SIDE SCREENSHOTS --- */
+        .images-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .mockup-img {
+            position: absolute;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-color); 
+            background-color: #0b0c0e; 
+            object-fit: cover;
+        }
+
+        .mockup-bg {
+            width: 450px;
+            height: 250px;
+            top: 0;
+            right: 0;
+            z-index: 1;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .mockup-bg:hover {
+            opacity: 1;
+            z-index: 3; 
+        }
+
+        .mockup-fg {
+            width: 520px;
+            height: 340px;
+            top: 120px;
+            right: 60px;
+            z-index: 2;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="rain-container"></div>
+
+    <div id="grid-container"></div>
+
+    <div class="content-wrapper">
+        <nav>
+            <div class="nav-left">
+                <div class="nav-logo">Foxstrap</div>
+                <span class="version-pill">v3.0.2</span>
+            </div>
+            <div class="nav-links">
+                <a href="https://github.com/FoxStrapOffical/FoxStrapV1.Beta" target="_blank">GitHub</a>
+                <a href="https://discord.gg/qSfH7Y59tp" target="_blank">Discord</a>
+                <a href="#">About Us</a>
+                <a href="https://github.com/FoxStrapOffical/FoxStrapV1.Beta/releases/download/v3.0.2/FoxStrap.zip" class="btn-primary">Download</a>
+            </div>
+        </nav>
+
+        <main class="hero">
+            <div class="hero-left">
+                <div class="main-title-area">
+                    <img src="robloxlogo11.png" alt="Foxstrap Logo" class="main-logo-img">
+                    <div class="hero-title">
+                        <h1>Foxstrap</h1>
+                        <p>A Bloxstrap fork</p>
+                    </div>
+                </div>
+
+                <p class="description">
+                    Foxstrap is an alternative to the normal Roblox bootstrapper, with tons of features that cannot be found in the regular app.
+                </p>
+
+                <ul class="links-list">
+                    <li>Found any bugs? <a href="https://github.com/FoxStrapOffical/FoxStrapV1.Beta/issues" target="_blank">Submit an issue &rarr;</a></li>
+                    <li>Want some mods? <a href="https://discord.gg/qSfH7Y59tp" target="_blank">Join our server &rarr;</a></li>
+                </ul>
+
+                <button class="download-btn-large" onclick="window.location.href='https://github.com/FoxStrapOffical/FoxStrapV1.Beta/releases/download/v3.0.2/FoxStrap.zip';">
+                    Download 
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+
+                <div class="winget-section">
+                    <p>Or, Install from Winget:</p>
+                    <div class="terminal-box">
+                        <span class="terminal-text"><span>&gt;</span> winget install Foxstrap.Foxstrap</span>
+                        <button class="copy-btn" onclick="copyWinget(this)">Copy</button>
+                    </div>
+                </div>
+
+                <a href="https://github.com/FoxStrapOffical/FoxStrapV1.Beta" target="_blank" class="github-link-bottom">View the repository on <span>Github &rarr;</span></a>
+            </div>
+
+            <div class="hero-right">
+                <div class="images-container">
+                    <img src="settings-mockup.png" alt="Foxstrap Settings" class="mockup-img mockup-bg">
+                    <img src="roblox-mockup.png" alt="Roblox Menu" class="mockup-img mockup-fg">
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT FOR VERTICAL RAIN EFFECT ---
+        const rainContainer = document.getElementById('rain-container');
+        const dropCount = 90; 
+
+        for(let i = 0; i < dropCount; i++) {
+            let drop = document.createElement('div');
+            drop.classList.add('drop');
+            drop.style.left = Math.random() * 100 + 'vw'; 
+            drop.style.animationDuration = Math.random() * 0.6 + 0.4 + 's'; 
+            drop.style.animationDelay = Math.random() * 2 + 's';
+            rainContainer.appendChild(drop);
+        }
+
+        // --- JAVASCRIPT FOR THE GRID HOVER EFFECT ---
+        const gridContainer = document.getElementById('grid-container');
+        const cellSize = 100; 
+
+        function createGrid() {
+            gridContainer.innerHTML = ''; 
+            
+            const cols = Math.floor(window.innerWidth / cellSize) + 1;
+            const rows = Math.floor(window.innerHeight / cellSize) + 1;
+            
+            gridContainer.style.width = `${cols * cellSize}px`;
+            gridContainer.style.height = `${rows * cellSize}px`;
+
+            for (let i = 0; i < cols * rows; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('grid-cell');
+                cell.style.width = `${cellSize}px`;
+                cell.style.height = `${cellSize}px`;
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        createGrid();
+        window.addEventListener('resize', createGrid);
+
+        // --- COPY BUTTON FUNCTIONALITY ---
+        function copyWinget(btn) {
+            navigator.clipboard.writeText('winget install Foxstrap.Foxstrap');
+            btn.innerText = 'Copied!';
+            setTimeout(() => {
+                btn.innerText = 'Copy';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
